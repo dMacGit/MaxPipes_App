@@ -18,9 +18,9 @@ This is a work in progress, and currently has a long way to go to be fully usabl
 
 ####Planned:
 
-- ItemSelectionListener on the ListAdapter elements/views (Half implemented)
+- ItemSelectionListener on the ListAdapter elements/views *(Half implemented)*
 - JSON handler for top streams by game.
-- ListAdapter for displaying top streams by game data. (Display similar to topGames)
+- ListAdapter for displaying top streams by game data. *(Display similar to topGames)*
 - ItemSelectionListener on the above ListAdapter, which plays the selected stream.
-- Customize the player controls. (Remove the seek-bar, time, forward/rewind buttons)
+- Customize the player controls. *(Remove the seek-bar, time, forward/rewind buttons)*
 - Finish the listview layouts.
