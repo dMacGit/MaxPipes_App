@@ -36,6 +36,8 @@ public class image_Service extends IntentService
 		final ResultReceiver receiver = intent.getParcelableExtra("receiver");
 		
 		String command = intent.getStringExtra("command");
+		String list = intent.getStringExtra("list");
+		System.out.println(list);
 		ArrayList<String> data = intent.getStringArrayListExtra("imageUrls");
 		ArrayList<Bitmap> bitmapArray = new ArrayList<Bitmap>();
 		Bundle bundle = new Bundle();
@@ -59,6 +61,10 @@ public class image_Service extends IntentService
 		}
 		
 		bundle.putParcelableArrayList("images", bitmapArray);
+		if( list != null && list.equalsIgnoreCase("streams"))
+		{
+			bundle.putString("list", list.toString());
+		}
 		receiver.send(STATUS.FINISHED, bundle);
 		
 	}

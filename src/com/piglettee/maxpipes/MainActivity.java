@@ -41,10 +41,14 @@ public class MainActivity extends Activity implements ServiceResultsReceiver.Rec
 	private String screenHeight;
 	
 	private List<GameObject> topGamesList;
-	private StreamPlayer playerActivity;
-	private GameListAdapter gameListAdapter;
-	private ProgressDialog progressBar;
+	private List<StreamObject> streamList;
 	
+	private StreamPlayer playerActivity;
+	
+	private GameListAdapter gameListAdapter;
+	private StreamListAdapter streamListAdapter;
+	
+	private ProgressDialog progressBar;
 	
 	private final String TAG  = "[MaxPipes] MainActivity";
 	private final String service_TAG = "[MaxPipes] TwitchTv_Service";
@@ -65,8 +69,10 @@ public class MainActivity extends Activity implements ServiceResultsReceiver.Rec
 	        ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.CENTER);
 	
 	private Intent requestStreamsIntent, imageLoader;
-	public ListView listAdapterView;
+	public ListView listAdapterView, streamListAdapterView;
+	
 	private GamesItemClickListener gamesItemClickListener = new GamesItemClickListener();
+	private StreamItemClickListener streamItemClickListener = new StreamItemClickListener();
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) 
@@ -74,7 +80,7 @@ public class MainActivity extends Activity implements ServiceResultsReceiver.Rec
 		super.onCreate(savedInstanceState);
 		
 		topGamesList = new ArrayList<GameObject>();
-		
+		streamList = new ArrayList<StreamObject>();
 		//requestWindowFeature(Window.FEATURE_NO_TITLE);
 	    //getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
@@ -87,7 +93,8 @@ public class MainActivity extends Activity implements ServiceResultsReceiver.Rec
 		imageFileReceiver.setReceiver(this);
 		
 
-		listAdapterView = (ListView) findViewById(R.layout.games_list);
+		//listAdapterView = (ListView) findViewById(R.layout.games_list);
+		
 		
 		setContentView(R.layout.games_list);
 		
@@ -163,8 +170,16 @@ public class MainActivity extends Activity implements ServiceResultsReceiver.Rec
 				break;
 			case STATUS.FINISHED:
 				//TODO:Add imageList to list adapter
-				gameListAdapter.updateImageList(resultData.getParcelableArrayList("images"));
-				gameListAdapter.notifyDataSetChanged();
+				if( resultData.getString("list") != null)
+				{
+					streamListAdapter.updateImageList(resultData.getParcelableArrayList("images"));
+					streamListAdapter.notifyDataSetChanged();
+				}
+				else 
+				{
+					gameListAdapter.updateImageList(resultData.getParcelableArrayList("images"));
+					gameListAdapter.notifyDataSetChanged();
+				}
 				break;
 			case STATUS.ERROR: //Handle any errors in the service
 				//String error = resultData.getString(Intent.EXTRA_TEXT);
@@ -224,7 +239,7 @@ public class MainActivity extends Activity implements ServiceResultsReceiver.Rec
 			 */
 			String parsedString = resultData.getString("results").replace("\\", "");
 			parsedString = parsedString.replace("\"", "");
-			
+			String channelName = resultData.getString("channel");
 			/* Make JSONObject
 			 * - Root
 			 * 		- Token Object
@@ -250,7 +265,7 @@ public class MainActivity extends Activity implements ServiceResultsReceiver.Rec
 				 * add ====> &allow_audio_only=true&allow_source=true&type=any&p={9333029}
 				 * finally ===> &sig=[]
 				 */
-				String urlStart = "http://usher.twitch.tv/api/channel/hls/"+stream.getChannel().getName()+".m3u8?player=twitchweb";
+				String urlStart = "http://usher.twitch.tv/api/channel/hls/"+channelName+".m3u8?player=twitchweb";
 				String tokenPart = "&token="+nauth;
 				String lastPart = "&allow_audio_only=true&allow_source=true&type=any&p={9333029}";
 				String sigPart = "&sig="+nauthsig;
@@ -267,6 +282,36 @@ public class MainActivity extends Activity implements ServiceResultsReceiver.Rec
 			{
 				Log.v(TAG, "JSONException validating json response! "+ex.getMessage());
 			}
+		}
+		else if(resultData.getString("twitchResponse").compareToIgnoreCase("getStreamsByGame")==0)
+		{
+			//progressBar.dismiss();
+			setContentView(R.layout.stream_list);
+			parseStreamsByGameResults(resultData.getString("results"));
+			
+			streamListAdapter = new StreamListAdapter();
+			if(!this.streamList.isEmpty())
+			{
+				streamListAdapter.updateDataList(streamList);
+			}
+			//streamListAdapterView = (ListView) findViewById(R.layout.stream_list);
+			streamListAdapterView = (ListView) findViewById(R.id.streamListView);
+			
+			streamListAdapterView.setAdapter(streamListAdapter);
+			streamListAdapterView.setOnItemClickListener(streamItemClickListener);
+			
+			imageLoader.removeExtra("command");
+			imageLoader.removeExtra("imageUrls");
+			imageLoader.putStringArrayListExtra("imageUrls", getStreamListMediumImageUrls_List());
+			Log.v(TAG,"String Array Loaded!");
+			imageLoader.putExtra("command","loadImages");
+			imageLoader.putExtra("list","streams");
+			imageLoader.putExtra("receiver",imageFileReceiver);
+			
+			startService(imageLoader);
+			Log.v(TAG,"Image Loader created AND Started");
+			//Log.v(TAG, this.topGame.toString());
+			
 		}
 		else if(resultData.getString("twitchResponse").compareToIgnoreCase("topGames")==0)
 		{
@@ -345,6 +390,43 @@ public class MainActivity extends Activity implements ServiceResultsReceiver.Rec
 			requestStreamsIntent.putExtra("channel",stream.getChannel().getName());
 			startService(requestStreamsIntent);
 		}
+	}
+	
+	private void parseStreamsByGameResults(String stringResults) 
+	{
+		/*
+		 * streams []
+		 * 	- channel []
+		 * 		-name
+		 */
+		
+		JSONArray streamArray;
+		JSONObject streamRootObject;
+		try 
+		{
+			streamRootObject = new JSONObject(stringResults);
+			streamArray = streamRootObject.getJSONArray("streams");
+			for(int index = 0; index < streamArray.length(); index++)
+			{
+				streamList.add(new StreamObject(streamArray.getJSONObject(index)));
+				final String stringPrint = streamList.get(index).getChannel().getName().toString();
+				Log.v(TAG,"Stream: "+index+" "+stringPrint);
+			}		
+		}
+		catch (JSONException ex) 
+		{
+			Log.v(TAG,"JSONException validating json response! "+ex.getMessage());
+		}
+	}
+
+	private ArrayList<String> getStreamListMediumImageUrls_List()
+	{
+		ArrayList<String> returnedURLs = new ArrayList<String>();
+		for(StreamObject stream : streamList)
+		{
+			returnedURLs.add(stream.getPreview().getMedium_url());
+		}
+		return returnedURLs;
 	}
 	
 	private ArrayList<String> getMediumImageUrls_List()
@@ -472,9 +554,36 @@ public class MainActivity extends Activity implements ServiceResultsReceiver.Rec
 			GameObject selectedGameItem = (GameObject) parent.getItemAtPosition(position);
 			Log.v(TAG, "You have selected: "+(selectedGameItem.getGame()).getName());
 			
-			
+			requestStreamsIntent.removeExtra("twitchRequest");
+			requestStreamsIntent.removeExtra("channel");
+			requestStreamsIntent.putExtra("twitchRequest","getStreamsByGame");
+			requestStreamsIntent.putExtra("game",(selectedGameItem.getGame()).getName());
+			startService(requestStreamsIntent);
 			
 			//TODO: Now need to make another http call like: https://api.twitch.tv/kraken/streams?game=League%20of%20Legends
+		}
+
+		
+	}
+	private class StreamItemClickListener implements OnItemClickListener
+	{
+
+		@Override
+		public void onItemClick(AdapterView<?> parent, View view, int position,	long id) 
+		{
+			Log.v(TAG,"You have clicked ! \nView id is "+view.getId()+"\nId is "+id+"\nWith position: "+position);
+			StreamObject selectedStreamItem = (StreamObject) parent.getItemAtPosition(position);
+			Log.v(TAG, "You have selected: "+(selectedStreamItem.getChannel().getName()));
+			String streamName = selectedStreamItem.getChannel().getName();
+			
+			//TODO: Load up player with stream
+			Log.v(TAG, "Extra info: "+streamName);
+			requestStreamsIntent.removeExtra("twitchRequest");
+			requestStreamsIntent.putExtra("twitchRequest","accessToken");
+			requestStreamsIntent.putExtra("channel",streamName);
+			startService(requestStreamsIntent);
+			
+			//TODO: Example game list api call:  http call like: https://api.twitch.tv/kraken/streams?game=League%20of%20Legends
 		}
 
 		

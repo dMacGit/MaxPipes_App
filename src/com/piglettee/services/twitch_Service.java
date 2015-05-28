@@ -4,11 +4,15 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLEncoder;
+
 import org.json.JSONException;
 import org.json.JSONObject;
+
 import android.app.IntentService;
 import android.content.Intent;
 import android.os.Bundle;
@@ -42,10 +46,11 @@ public class twitch_Service extends IntentService
 		
 		String twitchCommand = workIntent.getStringExtra("twitchRequest");
 		String extraInfo = workIntent.getStringExtra("channel");
+		String game = workIntent.getStringExtra("game");
 		String m3u8_request = workIntent.getStringExtra("m3u8");
 		String tempValue;
 		
-		tempValue = validateURLRequest(twitchCommand, extraInfo, m3u8_request);
+		tempValue = validateURLRequest(twitchCommand, extraInfo, m3u8_request, game);
 		
 		//Check if request is for a m3u8 stream file
 		if(twitchCommand.compareToIgnoreCase("streamFile")==0)
@@ -56,7 +61,7 @@ public class twitch_Service extends IntentService
 		else
 		{
 			//Otherwise use normal url/json request handler
-			normalRequester(receiver, twitchCommand, tempValue, new Bundle());
+			normalRequester(receiver, twitchCommand, tempValue, new Bundle(), game, extraInfo);
 		}
 	}
 	
@@ -123,7 +128,7 @@ public class twitch_Service extends IntentService
 	 * It takes as input the ResultReceiver, the Command as a String, the request URL String, and the Bundle
 	 * It sends back the data in the bundle with a call to the ResultReceiver object.
 	 */
-	private void normalRequester(ResultReceiver receiver, String twitchCommand, String requestURL, Bundle theBundle)
+	private void normalRequester(ResultReceiver receiver, String twitchCommand, String requestURL, Bundle theBundle, String game, String extraInfo)
 	{
 		//Normal handler of the stream requests
 		
@@ -172,6 +177,7 @@ public class twitch_Service extends IntentService
 					if(twitchCommand.equalsIgnoreCase("accessToken"))
 					{
 						theBundle.putString("twitchResponse", twitchCommand);
+						theBundle.putString("channel", extraInfo);
 						theBundle.putString("results", stringLine);
 						receiver.send(STATUS.FINISHED, theBundle);
 					}
@@ -215,13 +221,27 @@ public class twitch_Service extends IntentService
 	 * Simple method that checks the passed data for correctness
 	 * and then gets the corresponding api url.
 	 */
-	private String validateURLRequest(String workData, String extraInfo, String m3u8_request) 
+	private String validateURLRequest(String workData, String extraInfo, String m3u8_request, String game) 
 	{
 		String validatedURL = "";
 		if(workData.equalsIgnoreCase("topGames"))
 		{
 			Log.v(TAG, workData+" <:> topGames");
 			validatedURL = "https://api.twitch.tv/kraken/games/top?limit=10";
+		}
+		else if(workData.equalsIgnoreCase("getStreamsByGame") && game != null)
+		{
+			Log.v(TAG, workData+" <:> getStreamsByGame");
+			try
+			{
+				final String encodedGameString = URLEncoder.encode(game, "UTF-8");
+				validatedURL = "https://api.twitch.tv/kraken/streams?game="+encodedGameString+"&limit=10";
+			}
+			catch (UnsupportedEncodingException ex) 
+			{
+				// TODO Auto-generated catch block
+				Log.v(TAG,"UnsupportedEncodingException "+ex.getMessage());
+			}
 		}
 		else if(workData.equalsIgnoreCase("getStreams"))
 		{

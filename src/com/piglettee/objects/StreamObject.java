@@ -35,12 +35,16 @@ public class StreamObject
 	
 	public StreamObject(JSONObject stream) throws JSONException
 	{
-		this.stream_ID = stream.getLong("_id");
-		this.game = stream.getString("game");
-		this.viewers = stream.getInt("viewers");
-		this.created_Date = stream.getString("created_at");
-		this.video_Height = stream.getString("video_height");
-		this.avg_Fps = stream.getString("average_fps");
+		//Use this shorthand method for null checking!
+		/*
+		 * this.value = (object.get("some_String").toString().compareToIgnoreCase("null")==0) ? Value_if_ null : object.getString("some_String");
+		 */
+		this.stream_ID = (stream.get("_id").toString().compareToIgnoreCase("null")==0) ? 0 : stream.getLong("_id");
+		this.game = (stream.get("game").toString().compareToIgnoreCase("null")==0) ? "" : stream.getString("game");
+		this.viewers = (stream.get("viewers").toString().compareToIgnoreCase("null")==0) ? 0 : stream.getInt("viewers");
+		this.created_Date = (stream.get("created_at").toString().compareToIgnoreCase("null")==0) ? "" : stream.getString("created_at");
+		this.video_Height = (stream.get("video_height").toString().compareToIgnoreCase("null")==0) ? "" : stream.getString("video_height");
+		this.avg_Fps = (stream.get("average_fps").toString().compareToIgnoreCase("null")==0) ? "" : stream.getString("average_fps");
 		
 		Log.v(TAG,"Main stream values extracted!");
 		
@@ -93,7 +97,7 @@ public class StreamObject
 		
 		public _links(JSONObject _links)  throws JSONException
 		{
-			Self = _links.getString("self");
+			Self = (_links.get("self").toString().compareToIgnoreCase("null")==0) ? "none" : _links.getString("self");
 		}
 		
 		public String getSelf_Link(){
@@ -192,22 +196,22 @@ public class StreamObject
 			this.game = (channelObject.get("game").toString().compareToIgnoreCase("null")==0) ? null : channelObject.getString("game");
 			this.logo = (channelObject.get("logo").toString().compareToIgnoreCase("null")==0) ? null : channelObject.getString("logo");
 
-			this.mature = (channelObject.get("mature").toString().compareToIgnoreCase("null")==0) ? null : channelObject.getBoolean("mature");
+			this.mature = (channelObject.get("mature").toString().compareToIgnoreCase("null")==0) ? false : channelObject.getBoolean("mature");
 
 			
 			this.status = (channelObject.get("status").toString().compareToIgnoreCase("null")==0) ? null : channelObject.getString("status");
-			this.partner = (channelObject.get("partner").toString().compareToIgnoreCase("null")==0) ? null : channelObject.getBoolean("partner");
+			this.partner = (channelObject.get("partner").toString().compareToIgnoreCase("null")==0) ? false : channelObject.getBoolean("partner");
 			this.url = (channelObject.get("url").toString().compareToIgnoreCase("null")==0) ? null : channelObject.getString("url");
 			this.video_banner = (channelObject.get("video_banner").toString().compareToIgnoreCase("null")==0) ? null : channelObject.getString("video_banner");
-			this.id = (channelObject.get("_id").toString().compareToIgnoreCase("null")==0) ? null : channelObject.getLong("_id");
+			this.id = (channelObject.get("_id").toString().compareToIgnoreCase("null")==0) ? 0 : channelObject.getLong("_id");
 			this.name = (channelObject.get("name").toString().compareToIgnoreCase("null")==0) ? null : channelObject.getString("name");
 			this.created_at = (channelObject.get("created_at").toString().compareToIgnoreCase("null")==0) ? null : channelObject.getString("created_at");
 			this.updated_at = (channelObject.get("updated_at").toString().compareToIgnoreCase("null")==0) ? null : channelObject.getString("updated_at");
-			this.delay = (channelObject.get("delay").toString().compareToIgnoreCase("null")==0) ? null : channelObject.getInt("delay");
-			this.followers = (channelObject.get("followers").toString().compareToIgnoreCase("null")==0) ? null : channelObject.getInt("followers");
+			this.delay = (channelObject.get("delay").toString().compareToIgnoreCase("null")==0) ? 0 : channelObject.getInt("delay");
+			this.followers = (channelObject.get("followers").toString().compareToIgnoreCase("null")==0) ? 0 : channelObject.getInt("followers");
 			this.profile_banner = (channelObject.get("profile_banner").toString().compareToIgnoreCase("null")==0) ? null : channelObject.getString("profile_banner");
 			this.profile_banner_background_color = (channelObject.get("profile_banner_background_color").toString().compareToIgnoreCase("null")==0) ? null : channelObject.getString("profile_banner_background_color");
-			this.views = (channelObject.get("views").toString().compareToIgnoreCase("null")==0) ? null : channelObject.getLong("views");
+			this.views = (channelObject.get("views").toString().compareToIgnoreCase("null")==0) ? 0 : channelObject.getLong("views");
 			this.language = (channelObject.get("language").toString().compareToIgnoreCase("null")==0) ? null : channelObject.getString("language");
 					
 			
@@ -231,16 +235,16 @@ public class StreamObject
 			
 			public _links(JSONObject channel_links) throws JSONException
 			{
-				Self = channel_links.getString("self");
-				Follows = channel_links.getString("follows");
-				Commercial = channel_links.getString("commercial");
-				Stream_Key = channel_links.getString("stream_key");
-				Chat = channel_links.getString("chat");
-				Features = channel_links.getString("features");
-				Subscriptions = channel_links.getString("subscriptions");
-				Editors = channel_links.getString("editors");
-				Videos = channel_links.getString("videos");
-				Teams = channel_links.getString("teams");
+				Self = (channel_links.get("self").toString().compareToIgnoreCase("null")==0) ? "none" : channel_links.getString("self");
+				Follows = (channel_links.get("follows").toString().compareToIgnoreCase("null")==0) ? "none" : channel_links.getString("follows");
+				Commercial = (channel_links.get("commercial").toString().compareToIgnoreCase("null")==0) ? "none" : channel_links.getString("commercial");
+				Stream_Key = (channel_links.get("stream_key").toString().compareToIgnoreCase("null")==0) ? "none" : channel_links.getString("stream_key");
+				Chat = (channel_links.get("chat").toString().compareToIgnoreCase("null")==0) ? "none" : channel_links.getString("chat");
+				Features = (channel_links.get("features").toString().compareToIgnoreCase("null")==0) ? "none" : channel_links.getString("features");
+				Subscriptions = (channel_links.get("subscriptions").toString().compareToIgnoreCase("null")==0) ? "none" : channel_links.getString("subscriptions");
+				Editors = (channel_links.get("editors").toString().compareToIgnoreCase("null")==0) ? "none" : channel_links.getString("editors");
+				Videos = (channel_links.get("videos").toString().compareToIgnoreCase("null")==0) ? "none" : channel_links.getString("videos");
+				Teams = (channel_links.get("teams").toString().compareToIgnoreCase("null")==0) ? "none" : channel_links.getString("teams");
 			}
 
 			public String getSelf() {
