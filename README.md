@@ -8,19 +8,16 @@ in which I can use the Twitch api again, and muck around with streaming video et
 
 This is a work in progress, and currently has a long way to go to be fully usable.
 
-####Currently coded:
+####Current State:
 
-- TopStream, and TopGames JSON results are handled.
-- GameObject contains all JSON data returned from TopGames results.
+- TopStream, streamByGame, and TopGames JSON results are handled.
+- GameObject and StreamObject classes hold required data from ther respective JSON calls.
 - Have fully coded the .m3u8 playlist compatability.
-- Is able to load and play/pause live twitch tv streams in default android media-player. *(Currently Dissabled)*
-- ListAdapter Implemented with Top Games data. *(Loads Game Image, Name and Total views)*
+- Is able to load and play/pause live twitch tv streams in default android media-player.
+- ListAdapter(s) Implemented which hold  Top Games and Stream data. *(Loads Game/Stream Image, Name and Total views)*
 
 ####Planned:
 
-- ItemSelectionListener on the ListAdapter elements/views *(Half implemented)*
-- JSON handler for top streams by game.
-- ListAdapter for displaying top streams by game data. *(Display similar to topGames)*
-- ItemSelectionListener on the above ListAdapter, which plays the selected stream.
+- Add back button compatibility, and handle closing/backing out of player.
 - Customize the player controls. *(Remove the seek-bar, time, forward/rewind buttons)*
 - Finish the listview layouts.
