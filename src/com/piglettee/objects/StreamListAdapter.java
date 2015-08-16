@@ -6,8 +6,10 @@ import java.util.List;
 import com.piglettee.maxpipes.R;
 
 
-import android.graphics.Bitmap;
+import com.squareup.picasso.Picasso;
 
+import android.content.Context;
+import android.graphics.Bitmap;
 import android.os.Parcelable;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -22,15 +24,24 @@ public class StreamListAdapter extends BaseAdapter
 	private final String TAG = "[MaxPipes] GameListAdapter"; 
 			
 	private List<StreamObject> dataList = new ArrayList<StreamObject>();
-	private List<Bitmap> imageList = new ArrayList<Bitmap>();
+	private List<String> imageList = new ArrayList<String>();
+	
+	private Context context;
+	private boolean enableIndicators;
+	
+	public StreamListAdapter(Context newContext, boolean enableIndicators)
+	{
+		this.context = newContext;
+		this.enableIndicators = enableIndicators;
+	}
 	
 	public void updateDataList(List<StreamObject> objectList)
 	{
 		this.dataList = objectList;
 	}
-	public void updateImageList(List<? extends Parcelable> objectList)
+	public void updateImageList(List<String> objectList)
 	{
-		this.imageList = (List<Bitmap>) objectList;
+		this.imageList = objectList;
 	}
 	
 
@@ -71,7 +82,7 @@ public class StreamListAdapter extends BaseAdapter
 			StreamerViews.setText(Integer.toString(tempGame.getViewers()));
 			if(!imageList.isEmpty())
 			{
-				ImageURL.setImageBitmap(imageList.get(position));
+				Picasso.with(this.context).load(imageList.get(position)).into(ImageURL);
 			}
 		}
 		return convertView;

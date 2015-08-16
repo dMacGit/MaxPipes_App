@@ -11,6 +11,7 @@ import org.json.JSONObject;
 
 import com.piglettee.services.*;
 import com.piglettee.objects.*;
+import com.squareup.picasso.Picasso;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
@@ -31,6 +32,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.ListView;
 
 public class MainActivity extends Activity implements ServiceResultsReceiver.Receiver, ImageFileReceiver.Receiver
@@ -60,6 +62,10 @@ public class MainActivity extends Activity implements ServiceResultsReceiver.Rec
     final String encoding = "UTF-8";
     
     private View main;
+    
+    //Picasso Variables
+    
+    private boolean enablePicassoIndicators;
 	
 	public ServiceResultsReceiver serviceResultsReceiver;
 	public ImageFileReceiver imageFileReceiver;
@@ -78,6 +84,9 @@ public class MainActivity extends Activity implements ServiceResultsReceiver.Rec
 	protected void onCreate(Bundle savedInstanceState) 
 	{
 		super.onCreate(savedInstanceState);
+		
+		//Enable or disable Picasso storage indicators;
+		enablePicassoIndicators = true;
 		
 		topGamesList = new ArrayList<GameObject>();
 		streamList = new ArrayList<StreamObject>();
@@ -172,13 +181,13 @@ public class MainActivity extends Activity implements ServiceResultsReceiver.Rec
 				//TODO:Add imageList to list adapter
 				if( resultData.getString("list") != null)
 				{
-					streamListAdapter.updateImageList(resultData.getParcelableArrayList("images"));
-					streamListAdapter.notifyDataSetChanged();
+					//streamListAdapter.updateImageList(resultData.getParcelableArrayList("images"));
+					//streamListAdapter.notifyDataSetChanged();
 				}
 				else 
 				{
-					gameListAdapter.updateImageList(resultData.getParcelableArrayList("images"));
-					gameListAdapter.notifyDataSetChanged();
+					//gameListAdapter.updateImageList(resultData.getParcelableArrayList("images"));
+					//gameListAdapter.notifyDataSetChanged();
 				}
 				break;
 			case STATUS.ERROR: //Handle any errors in the service
@@ -289,7 +298,7 @@ public class MainActivity extends Activity implements ServiceResultsReceiver.Rec
 			setContentView(R.layout.stream_list);
 			parseStreamsByGameResults(resultData.getString("results"));
 			
-			streamListAdapter = new StreamListAdapter();
+			streamListAdapter = new StreamListAdapter(this.getApplicationContext(), this.enablePicassoIndicators);
 			if(!this.streamList.isEmpty())
 			{
 				streamListAdapter.updateDataList(streamList);
@@ -300,7 +309,9 @@ public class MainActivity extends Activity implements ServiceResultsReceiver.Rec
 			streamListAdapterView.setAdapter(streamListAdapter);
 			streamListAdapterView.setOnItemClickListener(streamItemClickListener);
 			
-			imageLoader.removeExtra("command");
+			//|<---- START OF OLD CODE: This is the old code for the old method of downloading image files
+			
+			/*imageLoader.removeExtra("command");
 			imageLoader.removeExtra("imageUrls");
 			imageLoader.putStringArrayListExtra("imageUrls", getStreamListMediumImageUrls_List());
 			Log.v(TAG,"String Array Loaded!");
@@ -309,7 +320,12 @@ public class MainActivity extends Activity implements ServiceResultsReceiver.Rec
 			imageLoader.putExtra("receiver",imageFileReceiver);
 			
 			startService(imageLoader);
-			Log.v(TAG,"Image Loader created AND Started");
+			Log.v(TAG,"Image Loader created AND Started");*/
+			
+			//|<---- END OF OLD CODE!
+			
+			streamListAdapter.updateImageList(getStreamListMediumImageUrls_List());
+			streamListAdapter.notifyDataSetChanged();
 			//Log.v(TAG, this.topGame.toString());
 			
 		}
@@ -318,7 +334,7 @@ public class MainActivity extends Activity implements ServiceResultsReceiver.Rec
 			progressBar.dismiss();
 			parseTopGameResults(resultData.getString("results"));
 			
-			gameListAdapter = new GameListAdapter();
+			gameListAdapter = new GameListAdapter(this.getApplicationContext(), enablePicassoIndicators );
 			if(!topGamesList.isEmpty())
 			{
 				gameListAdapter.updateDataList(topGamesList);
@@ -327,13 +343,27 @@ public class MainActivity extends Activity implements ServiceResultsReceiver.Rec
 			
 			listAdapterView.setAdapter(gameListAdapter);
 			listAdapterView.setOnItemClickListener(gamesItemClickListener);
-			imageLoader = new Intent(this, image_Service.class);
-			imageLoader.putStringArrayListExtra("imageUrls", getMediumImageUrls_List());
+			
+			//|<---- START OF OLD CODE: This is the old code for the old method of downloading image files
+			
+			/*imageLoader = new Intent(this, image_Service.class);
+			
+			
+			imageLoader.putStringArrayListExtra("imageUrls", getLargeLogoArtImageUrls_List());
+			//imageLoader.putStringArrayListExtra("imageUrls", getMediumImageUrls_List());		<--------- Commented Out!
 			Log.v(TAG,"String Array Loaded!");
 			imageLoader.putExtra("command","loadImages");
 			imageLoader.putExtra("receiver",imageFileReceiver);
 			
-			startService(imageLoader);
+			startService(imageLoader);*/
+			
+			//|<---- END OF OLD CODE!
+			
+			//ALTERNATIVE METHOD: Picasso CALL TO METHOD START!!
+			
+			gameListAdapter.updateImageList(getLargeBoxArtImageUrls_List());
+			gameListAdapter.notifyDataSetChanged();
+			
 			Log.v(TAG,"Image Loader created AND Started");
 			//Log.v(TAG, this.topGame.toString());
 			
@@ -429,12 +459,32 @@ public class MainActivity extends Activity implements ServiceResultsReceiver.Rec
 		return returnedURLs;
 	}
 	
-	private ArrayList<String> getMediumImageUrls_List()
+	private ArrayList<String> getMediumBoxArtImageUrls_List()
 	{
 		ArrayList<String> returnedURLs = new ArrayList<String>();
 		for(GameObject game : this.topGamesList)
 		{
 			returnedURLs.add(game.getGame().getBoxart_Images().getMedium());
+		}
+		return returnedURLs;
+	}
+	
+	private ArrayList<String> getLargeBoxArtImageUrls_List()
+	{
+		ArrayList<String> returnedURLs = new ArrayList<String>();
+		for(GameObject game : this.topGamesList)
+		{
+			returnedURLs.add(game.getGame().getBoxart_Images().getLarge());
+		}
+		return returnedURLs;
+	}
+	
+	private ArrayList<String> getLargeLogoArtImageUrls_List()
+	{
+		ArrayList<String> returnedURLs = new ArrayList<String>();
+		for(GameObject game : this.topGamesList)
+		{
+			returnedURLs.add(game.getGame().getLogoart_Images().getLarge());
 		}
 		return returnedURLs;
 	}

@@ -37,11 +37,15 @@ import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
  
 
+
+
 import java.lang.ref.WeakReference;
 import java.util.Formatter;
 import java.util.Locale;
 
 import com.piglettee.maxpipes.R;
+
+
  
 /**
  * A view containing controls for a MediaPlayer. Typically contains the
@@ -638,7 +642,8 @@ public class VideoControllerView extends FrameLayout {
         }
     }
    
-    public interface MediaPlayerControl {
+    public interface MediaPlayerControl 
+    {
         void    start();
         void    pause();
         int     getDuration();

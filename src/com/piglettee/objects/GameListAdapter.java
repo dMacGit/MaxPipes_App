@@ -6,8 +6,10 @@ import java.util.List;
 import com.piglettee.maxpipes.R;
 
 
-import android.graphics.Bitmap;
+import com.squareup.picasso.Picasso;
 
+import android.content.Context;
+import android.graphics.Bitmap;
 import android.os.Parcelable;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -20,17 +22,24 @@ import android.widget.TextView;
 public class GameListAdapter extends BaseAdapter 
 {
 	private final String TAG = "[MaxPipes] GameListAdapter"; 
-			
+	private Context context;
+	
 	private List<GameObject> dataList = new ArrayList<GameObject>();
-	private List<Bitmap> imageList = new ArrayList<Bitmap>();
+	private List<String> imageList = new ArrayList<String>();
+	
+	public GameListAdapter(Context passedContext, boolean indicatorsEnabled)
+	{
+		this.context = passedContext;
+		Picasso.with(passedContext).setIndicatorsEnabled(indicatorsEnabled);
+	}
 	
 	public void updateDataList(List<GameObject> objectList)
 	{
 		this.dataList = objectList;
 	}
-	public void updateImageList(List<? extends Parcelable> objectList)
+	public void updateImageList(List<String> objectList)
 	{
-		this.imageList = (List<Bitmap>) objectList;
+		this.imageList = (List<String>) objectList;
 	}
 	
 
@@ -71,7 +80,8 @@ public class GameListAdapter extends BaseAdapter
 			GameViews.setText(Integer.toString(tempGame.getViewers()));
 			if(!imageList.isEmpty())
 			{
-				ImageURL.setImageBitmap(imageList.get(position));
+				Picasso.with(this.context).load(imageList.get(position)).into(ImageURL);
+				//ImageURL.setImageBitmap(imageList.get(position));
 			}
 		}
 		return convertView;

@@ -2,11 +2,6 @@ package com.piglettee.maxpipes;
 
 import java.io.IOException;
 
-
-
-
-
-
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.media.AudioManager;
@@ -23,6 +18,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.MediaController;
+
 import com.piglettee.objects.VideoControllerView;
 
 public class StreamPlayer extends Activity implements SurfaceHolder.Callback, OnPreparedListener, VideoControllerView.MediaPlayerControl
@@ -31,6 +27,7 @@ public class StreamPlayer extends Activity implements SurfaceHolder.Callback, On
 	private MediaPlayer mediaPlayer;
 	private VideoControllerView mediaController;
 	private String sourceURL;
+	@SuppressWarnings("unused")
 	@TargetApi(Build.VERSION_CODES.KITKAT)
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -41,8 +38,7 @@ public class StreamPlayer extends Activity implements SurfaceHolder.Callback, On
 		if(false)
 		{
 			requestWindowFeature(Window.FEATURE_NO_TITLE);
-		    getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, 
-		                            WindowManager.LayoutParams.FLAG_FULLSCREEN);
+		    getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 		}
 		else
 		{
