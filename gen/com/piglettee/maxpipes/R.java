@@ -11,10 +11,17 @@ public final class R {
     public static final class attr {
     }
     public static final class color {
-        public static final int black=0x7f040002;
+        public static final int black=0x7f040005;
         public static final int dark_blue=0x7f040001;
+        /**  IndianRed 
+         */
+        public static final int green_shade=0x7f040003;
         public static final int purple=0x7f040000;
-        public static final int white=0x7f040003;
+        public static final int red_shade=0x7f040002;
+        /**  LimeGreen 
+         */
+        public static final int transparent=0x7f040004;
+        public static final int white=0x7f040006;
     }
     public static final class dimen {
         /**  Default screen margins, per the Android Design guidelines. 
@@ -28,12 +35,17 @@ public final class R {
         public static final int activity_vertical_margin=0x7f050001;
     }
     public static final class drawable {
-        public static final int ic_launcher=0x7f020000;
-        public static final int ic_media_fullscreen_shrink=0x7f020001;
-        public static final int ic_media_fullscreen_stretch=0x7f020002;
-        public static final int ic_media_pause=0x7f020003;
-        public static final int ic_media_play=0x7f020004;
-        public static final int round_rectange=0x7f020005;
+        public static final int custom_layer_list=0x7f020000;
+        public static final int game_tile_rounded=0x7f020001;
+        public static final int ic_launcher=0x7f020002;
+        public static final int ic_media_fullscreen_shrink=0x7f020003;
+        public static final int ic_media_fullscreen_stretch=0x7f020004;
+        public static final int ic_media_pause=0x7f020005;
+        public static final int ic_media_play=0x7f020006;
+        public static final int left_rectangle_top=0x7f020007;
+        public static final int rectangle_middle=0x7f020008;
+        public static final int right_rectangle_top=0x7f020009;
+        public static final int round_rectangle=0x7f02000a;
     }
     public static final class id {
         public static final int action_settings=0x7f090019;

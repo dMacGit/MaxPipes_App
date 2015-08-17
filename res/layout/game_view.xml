@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:id="@+id/itemView" 
@@ -7,9 +7,17 @@
     android:paddingRight="40sp"
     android:paddingTop="25sp"
     android:paddingBottom="25sp"
+    android:orientation="vertical"
     
-    android:background="@drawable/round_rectange">"
+    android:background="@drawable/round_rectangle">
     
+    <!-- Twitch tv returns boxart images at max size of 272x380 pixels -->
+    
+    <ImageView 
+        android:src="@drawable/custom_layer_list"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        />
     
     <ImageView
            android:id="@+id/gameImage"
@@ -17,7 +25,8 @@
            android:layout_height="wrap_content"
            android:layout_alignParentLeft="true"
            android:layout_alignParentTop="true"
-			android:background="@color/black"
+           android:layout_marginTop="-25dp"
+		   android:background="@color/black"
            android:src="@drawable/ic_launcher" />
 
        <TextView
@@ -42,4 +51,4 @@
            android:background="@color/black"
            android:text="Description" />
 
-</RelativeLayout>
+</LinearLayout>
