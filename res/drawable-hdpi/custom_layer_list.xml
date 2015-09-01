@@ -9,12 +9,12 @@
         />
     
     <item 
-        android:right="110dp"
+        android:right="180dp"
         android:drawable="@drawable/left_rectangle_top"
 
         />
     
-    <item android:right="75dp">
+    <item android:right="80dp">
         
         <rotate
             android:fromDegrees="-45"
@@ -30,8 +30,7 @@
         			android:height="50dp" />
             </shape>
         </rotate>
-    </item>
-    
+    </item>   
     
 
 </layer-list>

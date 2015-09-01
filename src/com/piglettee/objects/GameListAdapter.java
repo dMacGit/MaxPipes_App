@@ -71,6 +71,7 @@ public class GameListAdapter extends BaseAdapter
 		}
 		TextView GameName = (TextView)convertView.findViewById(R.id.gameName);
 		TextView GameViews = (TextView)convertView.findViewById(R.id.gameViews);
+		TextView GameChannels = (TextView)convertView.findViewById(R.id.gameChannels);
 		ImageView ImageURL = (ImageView)convertView.findViewById(R.id.gameImage);
 		
 		final GameObject tempGame = dataList.get(position);
@@ -78,6 +79,7 @@ public class GameListAdapter extends BaseAdapter
 		{	
 			GameName.setText(tempGame.getGame().getName());
 			GameViews.setText(Integer.toString(tempGame.getViewers()));
+			GameChannels.setText(Integer.toString(tempGame.getChannels()));
 			if(!imageList.isEmpty())
 			{
 				Picasso.with(this.context).load(imageList.get(position)).into(ImageURL);
