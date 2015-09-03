@@ -9,4 +9,5 @@
     <color name="transparent">#00000000</color>
     <color name="normal_green">#006400</color>	<!-- Green -->
     <color name="normal_red">#DC143C</color> <!-- Crimson -->
+    <color name="normal_white">#FF000000</color> <!-- White -->
 </resources>

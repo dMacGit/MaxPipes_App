@@ -32,6 +32,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.FrameLayout;
+import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.ListView;
 
@@ -75,7 +76,7 @@ public class MainActivity extends Activity implements ServiceResultsReceiver.Rec
 	        ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.CENTER);
 	
 	private Intent requestStreamsIntent, imageLoader;
-	public ListView listAdapterView, streamListAdapterView;
+	public GridView listAdapterView, streamListAdapterView;
 	
 	private GamesItemClickListener gamesItemClickListener = new GamesItemClickListener();
 	private StreamItemClickListener streamItemClickListener = new StreamItemClickListener();
@@ -304,7 +305,7 @@ public class MainActivity extends Activity implements ServiceResultsReceiver.Rec
 				streamListAdapter.updateDataList(streamList);
 			}
 			//streamListAdapterView = (ListView) findViewById(R.layout.stream_list);
-			streamListAdapterView = (ListView) findViewById(R.id.streamListView);
+			streamListAdapterView = (GridView) findViewById(R.id.streamListView);
 			
 			streamListAdapterView.setAdapter(streamListAdapter);
 			streamListAdapterView.setOnItemClickListener(streamItemClickListener);
@@ -339,7 +340,8 @@ public class MainActivity extends Activity implements ServiceResultsReceiver.Rec
 			{
 				gameListAdapter.updateDataList(topGamesList);
 			}
-			listAdapterView = (ListView) findViewById(R.id.listView1);
+			//listAdapterView = (ListView) findViewById(R.id.listView1);
+			listAdapterView = (GridView) findViewById(R.id.gridViewParent);
 			
 			listAdapterView.setAdapter(gameListAdapter);
 			listAdapterView.setOnItemClickListener(gamesItemClickListener);
