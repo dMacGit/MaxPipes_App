@@ -57,9 +57,12 @@ public final class R {
         public static final int rectangle_middle=0x7f020009;
         public static final int right_rectangle_top=0x7f02000a;
         public static final int round_rectangle=0x7f02000b;
+        public static final int small_round_rectangle=0x7f02000c;
+        public static final int stream_bottom_rectangle=0x7f02000d;
+        public static final int stream_top_rectangle=0x7f02000e;
     }
     public static final class id {
-        public static final int action_settings=0x7f09001f;
+        public static final int action_settings=0x7f090020;
         public static final int bottomDisplay=0x7f09000b;
         public static final int ffwd=0x7f090012;
         public static final int fullscreen=0x7f090017;
@@ -75,11 +78,12 @@ public final class R {
         public static final int pause=0x7f090011;
         public static final int prev=0x7f09000f;
         public static final int rew=0x7f090010;
-        public static final int streamImage_ScreenShot=0x7f09001b;
+        public static final int streamImage_ScreenShot=0x7f09001c;
         public static final int streamItem_layout=0x7f09001a;
         public static final int streamListView=0x7f090019;
-        public static final int streamName=0x7f09001c;
-        public static final int streamViews=0x7f09001d;
+        public static final int streamName=0x7f09001e;
+        public static final int streamViews=0x7f09001b;
+        public static final int stream_bottomDisplay=0x7f09001d;
         public static final int streams_layout=0x7f090018;
         public static final int time=0x7f090016;
         public static final int time_current=0x7f090014;
@@ -90,7 +94,7 @@ public final class R {
         public static final int videoSurface=0x7f090002;
         public static final int videoSurfaceContainer=0x7f090001;
         public static final int video_container=0x7f090000;
-        public static final int webview_main=0x7f09001e;
+        public static final int webview_main=0x7f09001f;
     }
     public static final class layout {
         public static final int activity_main=0x7f030000;
