@@ -47,6 +47,7 @@ public class MainActivity extends Activity implements ServiceResultsReceiver.Rec
 	private List<StreamObject> streamList;
 	
 	private StreamPlayer playerActivity;
+	private String currentStreamURL;
 	
 	private GameListAdapter gameListAdapter;
 	private StreamListAdapter streamListAdapter;
@@ -63,6 +64,8 @@ public class MainActivity extends Activity implements ServiceResultsReceiver.Rec
     final String encoding = "UTF-8";
     
     private View main;
+    
+    private AppViews currentView;
     
     //Picasso Variables
     
@@ -104,8 +107,7 @@ public class MainActivity extends Activity implements ServiceResultsReceiver.Rec
 		
 
 		//listAdapterView = (ListView) findViewById(R.layout.games_list);
-		
-		
+				
 		setContentView(R.layout.games_list);
 		
 		//main.setBackgroundColor(Color.rgb(255, 255, 255));
@@ -126,17 +128,9 @@ public class MainActivity extends Activity implements ServiceResultsReceiver.Rec
 		progressBar.setCancelable(false);							//<---- Sets if un-cancelable on user touch
 		progressBar.show();
 		
+		//Call to load the gameList intent!
+		loadTopGames();
 		
-		requestStreamsIntent = new Intent(this, twitch_Service.class);
-		requestStreamsIntent.putExtra("twitchRequest","topGames");
-		requestStreamsIntent.putExtra("receiver",serviceResultsReceiver);
-		startService(requestStreamsIntent);
-		
-	    //Get list of the top steamers online from twitch tv!
-	    /*requestStreamsIntent = new Intent(this, twitch_Service.class);
-		requestStreamsIntent.putExtra("twitchRequest","topStreams");
-		requestStreamsIntent.putExtra("receiver",serviceResultsReceiver);
-		startService(requestStreamsIntent);*/
 	}
 	
 	//Handles applications state when the it is paused etc.
@@ -158,11 +152,31 @@ public class MainActivity extends Activity implements ServiceResultsReceiver.Rec
 		super.onResume();
 		if(playerActivity != null)
 		{
-			playerActivity.start();
+			Bundle playerBundle = new Bundle();
+			Intent newIntent = new Intent(this, StreamPlayer.class);
+			playerBundle.putString("source",currentStreamURL);
+			newIntent.putExtras(playerBundle);
+			playerActivity.recreate();
 		}
 
 		imageFileReceiver.setReceiver(this);
 		serviceResultsReceiver.setReceiver(this);
+		
+	}
+	
+	public void onBackPressed()
+	{
+		if(currentView != null && currentView == AppViews.GAME_LIST )
+		{
+			this.finish();
+		}
+		
+		if(currentView != null && currentView == AppViews.STREAM_LIST )
+		{
+			//GO Back and record state change!
+			loadTopGames();
+			
+		}		
 		
 	}
 	
@@ -297,6 +311,7 @@ public class MainActivity extends Activity implements ServiceResultsReceiver.Rec
 		{
 			//progressBar.dismiss();
 			setContentView(R.layout.stream_list);
+			currentView = AppViews.STREAM_LIST;
 			parseStreamsByGameResults(resultData.getString("results"));
 			
 			streamListAdapter = new StreamListAdapter(this.getApplicationContext(), this.enablePicassoIndicators);
@@ -310,21 +325,6 @@ public class MainActivity extends Activity implements ServiceResultsReceiver.Rec
 			streamListAdapterView.setAdapter(streamListAdapter);
 			streamListAdapterView.setOnItemClickListener(streamItemClickListener);
 			
-			//|<---- START OF OLD CODE: This is the old code for the old method of downloading image files
-			
-			/*imageLoader.removeExtra("command");
-			imageLoader.removeExtra("imageUrls");
-			imageLoader.putStringArrayListExtra("imageUrls", getStreamListMediumImageUrls_List());
-			Log.v(TAG,"String Array Loaded!");
-			imageLoader.putExtra("command","loadImages");
-			imageLoader.putExtra("list","streams");
-			imageLoader.putExtra("receiver",imageFileReceiver);
-			
-			startService(imageLoader);
-			Log.v(TAG,"Image Loader created AND Started");*/
-			
-			//|<---- END OF OLD CODE!
-			
 			streamListAdapter.updateImageList(getStreamListMediumImageUrls_List());
 			streamListAdapter.notifyDataSetChanged();
 			//Log.v(TAG, this.topGame.toString());
@@ -335,7 +335,13 @@ public class MainActivity extends Activity implements ServiceResultsReceiver.Rec
 			progressBar.dismiss();
 			parseTopGameResults(resultData.getString("results"));
 			
-			gameListAdapter = new GameListAdapter(this.getApplicationContext(), enablePicassoIndicators );
+			//Setting current view state for back functionality!
+			currentView = AppViews.GAME_LIST;
+			
+			if(gameListAdapter == null){
+				gameListAdapter = new GameListAdapter(this.getApplicationContext(), enablePicassoIndicators );
+			}
+			
 			if(!topGamesList.isEmpty())
 			{
 				gameListAdapter.updateDataList(topGamesList);
@@ -345,23 +351,6 @@ public class MainActivity extends Activity implements ServiceResultsReceiver.Rec
 			
 			listAdapterView.setAdapter(gameListAdapter);
 			listAdapterView.setOnItemClickListener(gamesItemClickListener);
-			
-			//|<---- START OF OLD CODE: This is the old code for the old method of downloading image files
-			
-			/*imageLoader = new Intent(this, image_Service.class);
-			
-			
-			imageLoader.putStringArrayListExtra("imageUrls", getLargeLogoArtImageUrls_List());
-			//imageLoader.putStringArrayListExtra("imageUrls", getMediumImageUrls_List());		<--------- Commented Out!
-			Log.v(TAG,"String Array Loaded!");
-			imageLoader.putExtra("command","loadImages");
-			imageLoader.putExtra("receiver",imageFileReceiver);
-			
-			startService(imageLoader);*/
-			
-			//|<---- END OF OLD CODE!
-			
-			//ALTERNATIVE METHOD: Picasso CALL TO METHOD START!!
 			
 			gameListAdapter.updateImageList(getLargeBoxArtImageUrls_List());
 			gameListAdapter.notifyDataSetChanged();
@@ -404,6 +393,7 @@ public class MainActivity extends Activity implements ServiceResultsReceiver.Rec
 			Stream_m3u8_playlist  selectedQuality = m3u8_playlist_Object.get("medium");
 			//Log.v(TAG,selectedQuality.getQuality());
 			String mainString = selectedQuality.getUri_String();
+			currentStreamURL = mainString;
 			//Log.v(TAG,mainString);
 			progressBar.dismiss();
 			
@@ -424,6 +414,20 @@ public class MainActivity extends Activity implements ServiceResultsReceiver.Rec
 		}
 	}
 	
+	public void loadTopGames()
+	{
+		if(requestStreamsIntent == null)
+		{
+			requestStreamsIntent = new Intent(this, twitch_Service.class);
+			requestStreamsIntent.putExtra("twitchRequest","topGames");
+			requestStreamsIntent.putExtra("receiver",serviceResultsReceiver);
+		}
+		setContentView(R.layout.games_list);
+		requestStreamsIntent.putExtra("twitchRequest","topGames");
+		requestStreamsIntent.putExtra("receiver",serviceResultsReceiver);
+		startService(requestStreamsIntent);
+	}
+	
 	private void parseStreamsByGameResults(String stringResults) 
 	{
 		/*
@@ -431,6 +435,12 @@ public class MainActivity extends Activity implements ServiceResultsReceiver.Rec
 		 * 	- channel []
 		 * 		-name
 		 */
+
+		//Clear the list when reloading the view
+		if(!streamList.isEmpty()){
+			streamList.clear();
+			Log.v(TAG, "The {StreamList} was not empty, so cleared it!");
+		}
 		
 		JSONArray streamArray;
 		JSONObject streamRootObject;
@@ -501,6 +511,12 @@ public class MainActivity extends Activity implements ServiceResultsReceiver.Rec
 		 * 	- game []
 		 * 
 		 */
+		
+		//Clear the list when reloading the view
+		if(!topGamesList.isEmpty()){
+			topGamesList.clear();
+			Log.v(TAG, "The {topGamesList} was not empty, so cleared it!");
+		}
 		
 		JSONArray gameArray;
 		JSONObject gameObject, gameRootObject;

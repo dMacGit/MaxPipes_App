@@ -37,6 +37,11 @@ public class GameListAdapter extends BaseAdapter
 	{
 		this.dataList = objectList;
 	}
+	public void resetLists()
+	{
+		dataList.clear();
+		imageList.clear();
+	}
 	public void updateImageList(List<String> objectList)
 	{
 		this.imageList = (List<String>) objectList;
