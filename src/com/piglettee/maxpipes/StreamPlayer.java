@@ -6,6 +6,8 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.media.MediaPlayer.OnErrorListener;
+import android.media.MediaPlayer.OnInfoListener;
 import android.media.MediaPlayer.OnPreparedListener;
 import android.net.Uri;
 import android.os.Build;
@@ -22,12 +24,15 @@ import android.widget.MediaController;
 
 import com.piglettee.objects.VideoControllerView;
 
-public class StreamPlayer extends Activity implements SurfaceHolder.Callback, OnPreparedListener, VideoControllerView.MediaPlayerControl
+public class StreamPlayer extends Activity implements 
+SurfaceHolder.Callback, OnPreparedListener, VideoControllerView.MediaPlayerControl
 {
 	private final String TAG = "[MaxPipes] MediaPlayer Activity";
 	private enum PlayerState { PLAYING, PAUSING, RESUMING, STOPPING, STARTING, CLOSING, PREPARING, INITIALIZING, RESTARTING };
 	private PlayerState currentState = PlayerState.INITIALIZING;
 	
+	private MediaPlayer.OnErrorListener errorListener;
+	private MediaPlayer.OnInfoListener infoListener;
 	private SurfaceView videoSurface;
 	private MediaPlayer mediaPlayer;
 	private boolean isPaused = true;
@@ -77,6 +82,64 @@ public class StreamPlayer extends Activity implements SurfaceHolder.Callback, On
 		videoHolder.addCallback(this);
 		
 		mediaPlayer = new MediaPlayer();
+		
+		//Added Error listener in order to use Info Listener!
+		errorListener = new MediaPlayer.OnErrorListener() 
+		{
+			
+			@Override
+			public boolean onError(MediaPlayer mp, int what, int extra)
+			{
+				switch(what)
+				{
+					case 1: Log.v(TAG,"<< MEDIA_ERROR_UNKNOWN >>");
+						break;
+					case 100: Log.v(TAG,"<< MEDIA_ERROR_SERVER_DIED >>");
+						break;
+				}
+				return true;
+			}
+		};
+		
+		//Added Info listener in order to handle media startup info/messages
+		infoListener = new MediaPlayer.OnInfoListener() {
+			
+			@Override
+			public boolean onInfo(MediaPlayer mp, int what, int extra) 
+			{
+				switch(what)
+				{
+					case 1: Log.v(TAG,"<< MEDIA_INFO_UNKNOWN >>");
+						break;
+					case 700: Log.v(TAG,"<< MEDIA_INFO_VIDEO_TRACK_LAGGING >>");
+						break;
+					case 3: Log.v(TAG,"<< MEDIA_INFO_VIDEO_RENDERING_START >>");
+						break;
+					case 701: Log.v(TAG,"<< MEDIA_INFO_BUFFERING_START >>");
+						break;
+					case 702: Log.v(TAG,"<< MEDIA_INFO_BUFFERING_END >>");
+						break;
+					case 703: Log.v(TAG,"<< MEDIA_INFO_NETWORK_BANDWIDTH >> -- "+extra);
+						break;
+					case 800: Log.v(TAG,"<< MEDIA_INFO_BAD_INTERLEAVING >>");
+						break;
+					case 801: Log.v(TAG,"<< MEDIA_INFO_NOT_SEEKABLE >>");
+						break;
+					case 802: Log.v(TAG,"<< MEDIA_INFO_METADATA_UPDATE >>");
+						break;
+					case 901: Log.v(TAG,"<< MEDIA_INFO_UNSUPPORTED_SUBTITLE >>");
+						break;
+					case 902: Log.v(TAG,"<< MEDIA_INFO_SUBTITLE_TIMED_OUT >>");
+						break;
+					
+				}
+				return true;
+			}
+		};
+		
+		//Setting the listeners to the mediaPlayer
+		mediaPlayer.setOnInfoListener(infoListener);
+		mediaPlayer.setOnErrorListener(errorListener);
 		Log.v(TAG, " . {1}MediaPlayer Has been created!");
 		mediaController = new VideoControllerView(this);
 		Log.v(TAG, " . {2}VideoControllerView Has been created!");
@@ -112,26 +175,6 @@ public class StreamPlayer extends Activity implements SurfaceHolder.Callback, On
 		{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
-	}
-	
-	private void playerManager(PlayerState newState)
-	{
-		if(newState == PlayerState.RESUMING)
-		{
-			currentState = PlayerState.RESUMING;
-		}
-		else if (newState == PlayerState.STARTING){
-			
-		}
-		else if (newState == PlayerState.PAUSING){
-			
-		}
-		else if (newState == PlayerState.STOPPING){
-			
-		}
-		else if (newState == PlayerState.CLOSING){
-			
 		}
 	}
 	
@@ -333,7 +376,7 @@ public class StreamPlayer extends Activity implements SurfaceHolder.Callback, On
 		else if(currentState == PlayerState.RESTARTING || currentState == PlayerState.STOPPING || currentState == PlayerState.PREPARING){
 			return false;
 		}
-		return mediaPlayer.isPlaying();
+		else return mediaPlayer.isPlaying();
 		
 	}
 	@Override
@@ -385,11 +428,29 @@ public class StreamPlayer extends Activity implements SurfaceHolder.Callback, On
 	public void pause() {
 		// TODO Auto-generated method stub
 		Log.v(TAG,"<< Pause has been called! >>");
-		if(isPlaying() && (currentState == PlayerState.PAUSING) )
+		if(isPlaying() || (currentState == PlayerState.PAUSING) )
 		{
 			mediaPlayer.pause();
 		}
 	}
+
+	
+	
+
+//	public class OnErrorListener
+//	{
+//		public boolean onError(MediaPlayer mp, int what, int extra)
+//		{
+//			switch(what)
+//			{
+//				case 1: Log.v(TAG,"<< MEDIA_ERROR_UNKNOWN >>");
+//					break;
+//				case 100: Log.v(TAG,"<< MEDIA_ERROR_SERVER_DIED >>");
+//					break;
+//			}
+//			return true;
+//		}
+//	}	
 
 
 }
