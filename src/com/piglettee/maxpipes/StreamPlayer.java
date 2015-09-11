@@ -27,7 +27,11 @@ import com.piglettee.objects.VideoControllerView;
 public class StreamPlayer extends Activity implements 
 SurfaceHolder.Callback, OnPreparedListener, VideoControllerView.MediaPlayerControl
 {
+	//Defaults and application final variables
 	private final String TAG = "[MaxPipes] MediaPlayer Activity";
+	private final boolean DEFAULT_WAKE_LOCK_STATUS = true;
+	
+	
 	private enum PlayerState { PLAYING, PAUSING, RESUMING, STOPPING, STARTING, CLOSING, PREPARING, INITIALIZING, RESTARTING };
 	private PlayerState currentState = PlayerState.INITIALIZING;
 	
@@ -45,6 +49,7 @@ SurfaceHolder.Callback, OnPreparedListener, VideoControllerView.MediaPlayerContr
 	{
 		super.onCreate(savedInstanceState);
 		
+		//Setting up the full-screen player view
 		if(false)
 		{
 			requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -55,13 +60,10 @@ SurfaceHolder.Callback, OnPreparedListener, VideoControllerView.MediaPlayerContr
 			requestWindowFeature(Window.FEATURE_NO_TITLE);
 			getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_IMMERSIVE);
 		}
-		
 		setContentView(R.layout.activity_stream_player);
 		
+		//Setting up all the player specific listeners and objects
 		initializePlayer();
-		
-		//playStream();
-		
 	}
 	
 	private void initializePlayer()
@@ -70,34 +72,44 @@ SurfaceHolder.Callback, OnPreparedListener, VideoControllerView.MediaPlayerContr
 		Bundle passedData = getIntent().getExtras();
 		if(passedData != null)
 		{
-			
+			//Extracting passed in stream URL
 			sourceURL = passedData.get("source").toString();
-			//System.out.println("Found the Bundle! "+sourceURL);
 		}
 		
+		//Keeping track of player State
 		currentState = PlayerState.INITIALIZING;
 		
+		//Creating and assigning the surface view
 		videoSurface = (SurfaceView) findViewById(R.id.videoSurface);
 		SurfaceHolder videoHolder = videoSurface.getHolder();
+		videoHolder.setKeepScreenOn(DEFAULT_WAKE_LOCK_STATUS);	//<----- Allowing for the wake lock while playing: Keep screen on!
 		videoHolder.addCallback(this);
 		
+		//Creating the media-player
 		mediaPlayer = new MediaPlayer();
+		mediaPlayer.setScreenOnWhilePlaying(DEFAULT_WAKE_LOCK_STATUS); //<----- Allowing for the wake lock while playing: Keep screen on!
+		
+		//TODO: Must add Code to handle keeping the aspect ratio on screen resize/orientation
 		
 		//Added Error listener in order to use Info Listener!
 		errorListener = new MediaPlayer.OnErrorListener() 
-		{
-			
+		{	
 			@Override
 			public boolean onError(MediaPlayer mp, int what, int extra)
 			{
+				boolean handled;
 				switch(what)
 				{
 					case 1: Log.v(TAG,"<< MEDIA_ERROR_UNKNOWN >>");
-						break;
+						handled = true;
+						return true;
 					case 100: Log.v(TAG,"<< MEDIA_ERROR_SERVER_DIED >>");
+						handled = true;
+						return true;
+					default: handled = false;
 						break;
 				}
-				return true;
+				return handled;
 			}
 		};
 		
@@ -107,33 +119,47 @@ SurfaceHolder.Callback, OnPreparedListener, VideoControllerView.MediaPlayerContr
 			@Override
 			public boolean onInfo(MediaPlayer mp, int what, int extra) 
 			{
+				boolean handled;
 				switch(what)
 				{
 					case 1: Log.v(TAG,"<< MEDIA_INFO_UNKNOWN >>");
+						handled = true;
 						break;
 					case 700: Log.v(TAG,"<< MEDIA_INFO_VIDEO_TRACK_LAGGING >>");
+						handled = true;
 						break;
 					case 3: Log.v(TAG,"<< MEDIA_INFO_VIDEO_RENDERING_START >>");
+						handled = true;
 						break;
 					case 701: Log.v(TAG,"<< MEDIA_INFO_BUFFERING_START >>");
+						handled = true;
 						break;
 					case 702: Log.v(TAG,"<< MEDIA_INFO_BUFFERING_END >>");
+						handled = true;
 						break;
 					case 703: Log.v(TAG,"<< MEDIA_INFO_NETWORK_BANDWIDTH >> -- "+extra);
+						handled = true;
 						break;
 					case 800: Log.v(TAG,"<< MEDIA_INFO_BAD_INTERLEAVING >>");
+						handled = true;
 						break;
 					case 801: Log.v(TAG,"<< MEDIA_INFO_NOT_SEEKABLE >>");
+						handled = true;	
 						break;
 					case 802: Log.v(TAG,"<< MEDIA_INFO_METADATA_UPDATE >>");
+						handled = true;
 						break;
 					case 901: Log.v(TAG,"<< MEDIA_INFO_UNSUPPORTED_SUBTITLE >>");
+						handled = true;	
 						break;
 					case 902: Log.v(TAG,"<< MEDIA_INFO_SUBTITLE_TIMED_OUT >>");
+						handled = true;
+						break;
+					default: handled = false;
 						break;
 					
 				}
-				return true;
+				return handled;
 			}
 		};
 		
@@ -347,6 +373,7 @@ SurfaceHolder.Callback, OnPreparedListener, VideoControllerView.MediaPlayerContr
 		super.onDestroy();
 		Log.v(TAG, " Destroying the Actitivy!");
 		if(mediaPlayer != null) mediaPlayer.release();
+		mediaPlayer = null;
 		this.finish();
 		Log.v(TAG, " Finished the Actitivy!");
 	}
