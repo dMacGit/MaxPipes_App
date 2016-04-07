@@ -44,8 +44,6 @@ import java.util.Formatter;
 import java.util.Locale;
 
 import com.piglettee.maxpipes.R;
-
-
  
 /**
  * A view containing controls for a MediaPlayer. Typically contains the

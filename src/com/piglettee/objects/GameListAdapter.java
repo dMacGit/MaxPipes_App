@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.piglettee.maxpipes.R;
-
-
 import com.squareup.picasso.Picasso;
 
 import android.content.Context;
