@@ -21,6 +21,7 @@ import android.graphics.Point;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Parcelable;
 import android.util.Log;
 import android.view.Display;
 import android.view.Gravity;
@@ -364,8 +365,8 @@ public class MainActivity extends Activity implements ServiceResultsReceiver.Rec
 			//Log.v(TAG, "M3U8: File equals:: "+resultData.getString("results"));
 			String[] fileArray = parseM3U8_File(resultData.getString("results"));
 			//Log.v(TAG, " ======== \n"+fileArray[1].toString());
-			HashMap<String, Integer> map = M3U8_Parser.parseHLSMetadata(fileArray);
-			for(Object key : map.keySet())
+			Stream_m3u8 streamDataObject = new Stream_m3u8(M3U8_Parser.parseHLSMetadata(fileArray));
+			/*for(Object key : map.keySet())
 			{
 				String lineData = key.toString();
 				//Log.v(TAG,lineData);
@@ -389,17 +390,50 @@ public class MainActivity extends Activity implements ServiceResultsReceiver.Rec
 				else if(quality.contains("audio_only")){
 					m3u8_playlist_Object.put("audio_only", new Stream_m3u8_playlist(key.toString()));
 				}
-			}
-			Stream_m3u8_playlist  selectedQuality = m3u8_playlist_Object.get("medium");
+			}*/
+			//Stream_m3u8_playlist  selectedQuality = ;
+			
+			String resName = STREAM_RESOLUTION.Medium.name();
+			Log.v(TAG,streamDataObject.getResURL_Object("source").getQuality());
+			Log.v(TAG,streamDataObject.getResURL_Object("source").getUri_String());
 			//Log.v(TAG,selectedQuality.getQuality());
-			String mainString = selectedQuality.getUri_String();
-			currentStreamURL = mainString;
-			//Log.v(TAG,mainString);
+			String resURL = streamDataObject.getResURL_Object("medium").getUri_String();
+			currentStreamURL = resURL;
+			
+			
+			Log.v(TAG,"<<< Selected RES: "+resName+" with url: "+resURL+" >>>");
+			//
 			progressBar.dismiss();
 			
 			Bundle playerBundle = new Bundle();
 			Intent newIntent = new Intent(this, StreamPlayer.class);
-			playerBundle.putString("source",mainString);
+			
+			/*
+			 * Need to create object to pass back the different qualities and their URL's
+			 */
+			
+			//Create parcelable object!
+			ArrayList<String> resArrayKeys = new ArrayList<String>();
+			ArrayList<String> resArrayValues = new ArrayList<String>();
+			
+			resArrayKeys.add(streamDataObject.getResURL_Object("source").getQuality());
+			resArrayValues.add(streamDataObject.getResURL_Object("source").getUri_String());
+			resArrayKeys.add(streamDataObject.getResURL_Object("high").getQuality());
+			resArrayValues.add(streamDataObject.getResURL_Object("high").getUri_String());
+			resArrayKeys.add(streamDataObject.getResURL_Object("medium").getQuality());
+			resArrayValues.add(streamDataObject.getResURL_Object("medium").getUri_String());
+			resArrayKeys.add(streamDataObject.getResURL_Object("low").getQuality());
+			resArrayValues.add(streamDataObject.getResURL_Object("low").getUri_String());
+			resArrayKeys.add(streamDataObject.getResURL_Object("mobile").getQuality());
+			resArrayValues.add(streamDataObject.getResURL_Object("mobile").getUri_String());
+			resArrayKeys.add(streamDataObject.getResURL_Object("audio_only").getQuality());
+			resArrayValues.add(streamDataObject.getResURL_Object("audio_only").getUri_String());
+			
+			playerBundle.putStringArrayList("res_keys", resArrayKeys);
+			playerBundle.putStringArrayList("res_values", resArrayValues);
+			
+			playerBundle.putString("url_res",resName);
+			playerBundle.putString("url_source",resURL);
 			newIntent.putExtras(playerBundle);
 			startActivity(newIntent,playerBundle);
 		}

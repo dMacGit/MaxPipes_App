@@ -1,5 +1,8 @@
 package com.piglettee.objects;
 
+import android.app.AlertDialog;
+import android.app.AlertDialog.Builder;
+
 /*
  * Copyright (C) 2006 The Android Open Source Project
  *
@@ -17,6 +20,7 @@ package com.piglettee.objects;
  */
  
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Handler;
 import android.os.Message;
 import android.util.AttributeSet;
@@ -24,6 +28,7 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,19 +36,20 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.widget.PopupMenu;
+import android.widget.PopupMenu.OnMenuItemClickListener;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
- 
-
-
+import android.widget.Toast;
 
 import java.lang.ref.WeakReference;
 import java.util.Formatter;
 import java.util.Locale;
 
 import com.piglettee.maxpipes.R;
+import com.piglettee.maxpipes.StreamPlayer;
  
 /**
  * A view containing controls for a MediaPlayer. Typically contains the
@@ -73,7 +79,8 @@ import com.piglettee.maxpipes.R;
  *   with the boolean set to false
  * </ul>
  */
-public class VideoControllerView extends FrameLayout {
+public class VideoControllerView extends FrameLayout implements OnMenuItemClickListener
+{
     private static final String TAG = "VideoControllerView";
    
     private MediaPlayerControl  mPlayer;
@@ -99,7 +106,15 @@ public class VideoControllerView extends FrameLayout {
     private ImageButton         mNextButton;
     private ImageButton         mPrevButton;
     private ImageButton         mFullscreenButton;
+    private ImageButton         mResolutionButton;
     private Handler             mHandler = new MessageHandler(this);
+    
+    //Added stuff
+    
+    AlertDialog mLangDialog;
+    private STREAM_RESOLUTION newRes;
+    
+    private PopupMenu popupMenu;
  
     public VideoControllerView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -182,8 +197,17 @@ public class VideoControllerView extends FrameLayout {
             mFullscreenButton.requestFocus();
             mFullscreenButton.setOnClickListener(mFullscreenListener);
         }
+        
+        mResolutionButton = (ImageButton) v.findViewById(R.id.settings);
+        if (mResolutionButton != null) {
+        	mResolutionButton.requestFocus();
+        	mResolutionButton.setOnClickListener(mSettingsListener);
+        	mResolutionButton.setImageResource(R.drawable.media_settings);
+        }
  
-        mFfwdButton = (ImageButton) v.findViewById(R.id.ffwd);
+        //TODO: Add here
+        
+       /* mFfwdButton = (ImageButton) v.findViewById(R.id.ffwd);
         if (mFfwdButton != null) {
             mFfwdButton.setOnClickListener(mFfwdListener);
             if (!mFromXml) {
@@ -207,9 +231,9 @@ public class VideoControllerView extends FrameLayout {
         mPrevButton = (ImageButton) v.findViewById(R.id.prev);
         if (mPrevButton != null && !mFromXml && !mListenersSet) {
             mPrevButton.setVisibility(View.GONE);
-        }
+        }*/
  
-        mProgress = (ProgressBar) v.findViewById(R.id.mediacontroller_progress);
+        /*mProgress = (ProgressBar) v.findViewById(R.id.mediacontroller_progress);
         if (mProgress != null) {
             if (mProgress instanceof SeekBar) {
                 SeekBar seeker = (SeekBar) mProgress;
@@ -219,7 +243,7 @@ public class VideoControllerView extends FrameLayout {
         }
  
         mEndTime = (TextView) v.findViewById(R.id.time);
-        mCurrentTime = (TextView) v.findViewById(R.id.time_current);
+        mCurrentTime = (TextView) v.findViewById(R.id.time_current);*/
         mFormatBuilder = new StringBuilder();
         mFormatter = new Formatter(mFormatBuilder, Locale.getDefault());
  
@@ -440,8 +464,69 @@ public class VideoControllerView extends FrameLayout {
         public void onClick(View v) {
             doToggleFullscreen();
             show(sDefaultTimeout);
+            
         }
     };
+    
+    private View.OnClickListener mSettingsListener = new View.OnClickListener() 
+    {
+    	@Override
+        public void onClick(View view) 
+        {
+            //doToggleFullscreen();
+        	/*Builder builder = new AlertDialog.Builder(mContext);  
+            builder.setMessage("Hi there!"); 
+            mLangDialog = builder.create();  
+            mLangDialog.show();
+            show(sDefaultTimeout);*/
+        	popupMenu = new PopupMenu(mContext, view);
+			popupMenu.setOnMenuItemClickListener(VideoControllerView.this);
+			popupMenu.inflate(R.menu.stream_res_menu);
+			show(sDefaultTimeout);
+			popupMenu.show();
+			
+        }
+    };
+    
+    public boolean onMenuItemClick(MenuItem item) 
+    {
+    	
+		switch (item.getItemId()) 
+		{
+		case R.id.item_source:
+			Toast.makeText(mContext, "Source Clicked", Toast.LENGTH_SHORT).show();
+			newRes = STREAM_RESOLUTION.Source;
+			Log.v(TAG,"User has clicked Res: "+STREAM_RESOLUTION.Source.name()+" "+newRes);
+			return true;
+		case R.id.item_high:
+			Toast.makeText(mContext, "High Clicked", Toast.LENGTH_SHORT).show();
+			newRes = STREAM_RESOLUTION.High;
+			return true;
+		case R.id.item_medium:
+			Toast.makeText(mContext, "Medium Clicked", Toast.LENGTH_SHORT).show();
+			newRes = STREAM_RESOLUTION.Medium;
+			return true;
+		case R.id.item_low:
+			Toast.makeText(mContext, "Low Clicked", Toast.LENGTH_SHORT).show();
+			newRes = STREAM_RESOLUTION.Low;
+			return true;
+		case R.id.item_mobile:
+			Toast.makeText(mContext, "Mobile Clicked", Toast.LENGTH_SHORT).show();
+			newRes = STREAM_RESOLUTION.Mobile;
+			return true;
+		}
+		return false;
+	}
+    
+    public STREAM_RESOLUTION getCurrentSelectedRes(STREAM_RESOLUTION currentRes)
+    {
+    	if(newRes != null)
+    	{
+    		return newRes;
+    	}
+    	else
+    		return currentRes;
+    }
  
     public void updatePausePlay() {
         if (mRoot == null || mPauseButton == null || mPlayer == null) {

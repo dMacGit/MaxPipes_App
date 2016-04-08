@@ -1,6 +1,10 @@
 package com.piglettee.maxpipes;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Locale;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
@@ -22,12 +26,15 @@ import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.MediaController;
 
+import com.piglettee.objects.STREAM_RESOLUTION;
 import com.piglettee.objects.VideoControllerView;
 
 public class StreamPlayer extends Activity implements 
 SurfaceHolder.Callback, OnPreparedListener, VideoControllerView.MediaPlayerControl
 {
 	//Defaults and application final variables
+	private HashMap<String, String> qualityMap;
+	
 	private final String TAG = "[MaxPipes] MediaPlayer Activity";
 	private final boolean DEFAULT_WAKE_LOCK_STATUS = true;
 	
@@ -41,13 +48,17 @@ SurfaceHolder.Callback, OnPreparedListener, VideoControllerView.MediaPlayerContr
 	private MediaPlayer mediaPlayer;
 	private boolean isPaused = true;
 	private VideoControllerView mediaController;
-	private String sourceURL;
+	private String sourceURL, newURL;
+	
+	private STREAM_RESOLUTION CURRENT_RES;
+	
 	@SuppressWarnings("unused")
 	@TargetApi(Build.VERSION_CODES.KITKAT)
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
+		qualityMap = new HashMap<String,String>();
 		
 		//Setting up the full-screen player view
 		if(false)
@@ -73,7 +84,34 @@ SurfaceHolder.Callback, OnPreparedListener, VideoControllerView.MediaPlayerContr
 		if(passedData != null)
 		{
 			//Extracting passed in stream URL
-			sourceURL = passedData.get("source").toString();
+			sourceURL = passedData.get("url_source").toString();
+			CURRENT_RES = Enum.valueOf(STREAM_RESOLUTION.class, passedData.get("url_res").toString());
+
+			
+			
+			//Test the other res URL's
+			
+			ArrayList<String> tempKeys = passedData.getStringArrayList("res_keys");
+			ArrayList<String> tempValues = passedData.getStringArrayList("res_values");
+			
+			//Iterator<String> keys = tempKeys.iterator();
+			//Iterator<String> values = tempValues.iterator();
+			
+			//while(keys.hasNext() && values.hasNext())
+			//{
+			//		qualityMap.put(keys.next(), values.next());
+			//}
+			
+			
+			
+			for(int index1=0; index1<tempValues.size(); index1++)
+			{
+				qualityMap.put(tempKeys.get(index1), tempValues.get(index1));
+				Log.v(TAG,"Res: "+tempKeys.get(index1)+" "+tempValues.get(index1));
+				
+			}
+			Log.v(TAG, qualityMap.get("source")+" is in 'source'");
+			
 		}
 		
 		//Keeping track of player State
@@ -204,6 +242,38 @@ SurfaceHolder.Callback, OnPreparedListener, VideoControllerView.MediaPlayerContr
 		}
 	}
 	
+	void updateThePlayer()
+	{
+		
+		
+		try {
+			if(newURL != null){
+				mediaPlayer.stop();
+				mediaPlayer.reset();
+				sourceURL = newURL;
+				mediaPlayer.setDataSource(this, Uri.parse(sourceURL));
+				Log.v(TAG, " .. {3}setDataSource Has been set!");
+				mediaPlayer.prepareAsync();
+				currentState = PlayerState.PREPARING;
+			}
+			
+		} catch (IllegalArgumentException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SecurityException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalStateException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
+	}
+	
 	public void onBackPressed()
 	{
 		Log.v(TAG, " onBackPressed Has been pressed!");
@@ -211,9 +281,14 @@ SurfaceHolder.Callback, OnPreparedListener, VideoControllerView.MediaPlayerContr
 	}
 	
 	
+	
 	@Override
 	public boolean onTouchEvent(MotionEvent event)
 	{
+
+		//Need to get the Resolution change if there was one!
+		STREAM_RESOLUTION tempRes = mediaController.getCurrentSelectedRes(CURRENT_RES);
+		
 		if(event.getAction() == MotionEvent.ACTION_DOWN)
 		{
 			if(!mediaController.isShowing())
@@ -227,7 +302,43 @@ SurfaceHolder.Callback, OnPreparedListener, VideoControllerView.MediaPlayerContr
 				return true;
 			}
 		}
+		else if(tempRes != null && tempRes.compareTo(CURRENT_RES)!=0)
+		{
+			//Here we change to the new Res if the current is different
+			updateStreamResolution(tempRes);
+			return true;
+		}
 		else return false;
+		
+	}
+	
+	private void updateStreamResolution(STREAM_RESOLUTION newStreamRes)
+	{
+		//Check and select correct Res
+		if(newStreamRes.compareTo(CURRENT_RES)!=0)
+		{
+			switch(newStreamRes)
+			{
+				case Source : newURL = qualityMap.get(newStreamRes.name().toLowerCase());
+				Log.v(TAG, "Trying to change Resolution to : "+newStreamRes.name());
+					break;
+				case High : newURL = qualityMap.get(newStreamRes.name().toLowerCase());
+				Log.v(TAG, "Trying to change Resolution to : "+newStreamRes.name());
+					break;
+				case Medium : newURL = qualityMap.get(newStreamRes.name().toLowerCase());
+				Log.v(TAG, "Trying to change Resolution to : "+newStreamRes.name());
+					break;
+				case Low : newURL = qualityMap.get(newStreamRes.name().toLowerCase());
+				Log.v(TAG, "Trying to change Resolution to : "+newStreamRes.name());
+					break;
+				case Mobile : newURL = qualityMap.get(newStreamRes.name().toLowerCase());
+				Log.v(TAG, "Trying to change Resolution to : "+newStreamRes.name());
+					break;
+				default : newURL = "NULL";
+					break;
+			}
+			updateThePlayer();
+		}
 		
 	}
 	
