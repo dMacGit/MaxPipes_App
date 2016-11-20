@@ -304,8 +304,10 @@ SurfaceHolder.Callback, OnPreparedListener, VideoControllerView.MediaPlayerContr
 		}
 		else if(tempRes != null && tempRes.compareTo(CURRENT_RES)!=0)
 		{
+			Log.v(TAG, "CURRENT RES SET TO: "+CURRENT_RES+" CHANGING TO: "+tempRes);
 			//Here we change to the new Res if the current is different
 			updateStreamResolution(tempRes);
+			CURRENT_RES = tempRes;
 			return true;
 		}
 		else return false;
