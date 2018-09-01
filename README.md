@@ -8,7 +8,7 @@ in which I can use the Twitch api again, and muck around with streaming video et
 
 This is a work in progress.
 
-####Current State:
+#### Current State:
 
 - Can display the top 10 current live streamed games from twitch.tv
 - Can display the top 10 current live channels of a selected game
@@ -18,7 +18,7 @@ This is a work in progress.
 - Have fully coded the .m3u8 playlist compatability.
 - Is able to load and play/pause live twitch tv streams in default android media-player.
 
-####Planned:
+#### Planned:
 
 - Add back button compatibility, and handle closing/backing out of player.
 - Customize the player controls. *(Remove the seek-bar, time, forward/rewind buttons)*
